@@ -151,10 +151,17 @@ class TetrisBoard:
         if piece is None:
             piece = self.current_piece
         if piece:
+            # Check if any part of the piece is above the board (game over condition)
+            for x, y in piece.get_cells():
+                if y < 0:
+                    return False  # Piece extends above board, should trigger game over
+
+            # Place the piece only if it's completely within bounds
             for x, y in piece.get_cells():
                 # SOLO COLOCAR BLOQUES DENTRO DEL TABLERO
                 if 0 <= x < self.width and 0 <= y < self.height:
                     self.grid[y][x] = piece.color
+        return True
 
     def clear_lines(self):
         lines_cleared = 0
@@ -236,7 +243,13 @@ class TetrisBoard:
     def check_game_over(self):
         """Verifica si el juego ha terminado"""
         if self.current_piece:
-            return not self.is_valid_position_for_piece(self.current_piece)
+            # Check if the current piece can be placed at its spawn position
+            if not self.is_valid_position_for_piece(self.current_piece):
+                return True
+            # Also check if any part of the piece is above the board
+            for x, y in self.current_piece.get_cells():
+                if y < 0:
+                    return True
         return False
     
     def update(self):
