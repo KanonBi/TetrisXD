@@ -13,7 +13,6 @@ class PlayerManager:
             ("Puntaje 10k", "Llega a 10,000 puntos", "épica", lambda p: p.get("best_score", 0) >= 10000),
             ("Coleccionista", "Desbloquea todas las cartas", "épica", lambda p: len(p.get("unlocked_cards", [])) >= 18),
             ("Jugador Persistente", "Juega 100 partidas", "rara", lambda p: p.get("games_played", 0) >= 100),
-            # ...agrega más logros aquí...
         ]
         self.xp_per_achievement = {"común": 50, "rara": 120, "épica": 300, "legendaria": 1000}
         self.coins_per_achievement = {"común": 10, "rara": 30, "épica": 100, "legendaria": 500}

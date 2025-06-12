@@ -240,7 +240,7 @@ class TetrisGame:
         base_points = [0, 100, 300, 500, 800, 1200, 1600, 2000, 3000]
         idx = min(lines_cleared, len(base_points) - 1)
         points = base_points[idx] * self.level * self.score_multiplier
-    
+
         # Bonus por modo dorado
         if self.golden_mode:
             points *= 2
@@ -250,9 +250,9 @@ class TetrisGame:
         if lines_cleared >= 2:
             combo_bonus = 200 * (lines_cleared - 1) * self.level
             points += combo_bonus
-            # Mostrar texto de bonus
             self.show_combo_bonus_text(combo_bonus)
-    
+
+        # ARREGLO: sumar puntos aunque sea una sola línea
         self.score += int(points)
         self.lines_cleared += lines_cleared
         self.level = self.lines_cleared // 10 + 1
@@ -420,30 +420,17 @@ class TetrisGame:
     def draw_block(self, x, y, color, alpha=255):
         cell_x = self.board_x + x * self.cell_size
         cell_y = self.board_y + y * self.cell_size
-        block_surf = pygame.Surface((self.cell_size - 2, self.cell_size - 2))
+        block_surf = pygame.Surface((self.cell_size - 2, self.cell_size - 2), pygame.SRCALPHA)
         block_surf.set_alpha(alpha)
         base_color = color
         if self.golden_mode:
             base_color = (min(255, color[0] + 50), min(255, color[1] + 50), min(255, color[2] // 2))
         block_surf.fill(base_color)
-        pygame.draw.rect(block_surf, (min(255, c + 40) for c in base_color), (0, 0, self.cell_size - 2, 3))
-        pygame.draw.rect(block_surf, (min(255, c + 40) for c in base_color), (0, 0, 3, self.cell_size - 2))
+        bright_color = tuple(min(255, c + 40) for c in base_color)
+        pygame.draw.rect(block_surf, bright_color, (0, 0, self.cell_size - 2, 3))
+        pygame.draw.rect(block_surf, bright_color, (0, 0, 3, self.cell_size - 2))
         self.screen.blit(block_surf, (cell_x + 1, cell_y + 1))
-    
-    def draw_ghost_piece(self):
-        if self.board.current_piece:
-            ghost_alpha = 80
-            for x, y in self.board.current_piece.get_cells():
-                ghost_y = y + (self.board.ghost_y - self.board.current_piece.y)
-                if ghost_y >= 0 and ghost_y != y:
-                    self.draw_block(x, ghost_y, self.board.current_piece.color, ghost_alpha)
-    
-    def draw_piece(self, piece):
-        alpha = 128 if self.ghost_mode else 255
-        for x, y in piece.get_cells():
-            if y >= 0:
-                self.draw_block(x, y, piece.color, alpha)
-    
+
     def draw_next_piece(self):
         if self.board.next_piece:
             next_x, next_y = 500, 120
@@ -452,10 +439,18 @@ class TetrisGame:
             pygame.draw.rect(self.screen, (80, 100, 130), bg_rect, 2, border_radius=8)
             title = self.font_medium.render("SIGUIENTE", True, (255, 255, 255))
             self.screen.blit(title, (next_x, next_y - 35))
-            for row_idx, row in enumerate(self.board.next_piece.shape):
+            # Dibuja la pieza siguiente con su color real
+            piece = self.board.next_piece
+            shape = piece.shape
+            color = piece.color
+            for row_idx, row in enumerate(shape):
                 for col_idx, cell in enumerate(row):
                     if cell != '.' and cell != ' ':
-                        self.screen.blit(pygame.transform.scale(pygame.Surface((23,23)),(23,23)), (next_x + 20 + col_idx * 25, next_y + row_idx * 25))
+                        mini_surf = pygame.Surface((23, 23), pygame.SRCALPHA)
+                        mini_surf.fill(color)
+                        pygame.draw.rect(mini_surf, tuple(min(255, c + 40) for c in color), (0, 0, 23, 3))
+                        pygame.draw.rect(mini_surf, tuple(min(255, c + 40) for c in color), (0, 0, 3, 23))
+                        self.screen.blit(mini_surf, (next_x + 20 + col_idx * 25, next_y + row_idx * 25))
 
     def draw_game_info(self):
         info_x, info_y = 500, 260
@@ -482,7 +477,7 @@ class TetrisGame:
             pygame.draw.rect(self.screen, (150, 100, 200), effects_bg, 2, border_radius=8)
             self.screen.blit(self.font_medium.render("EFECTOS ACTIVOS", True, (255, 200, 255)), (effects_x, effects_y))
             for i, effect in enumerate(active_effects):
-                self.screen.blit(self.font_small.render(effect, True, (255, 215, 0) if "Dorado" in effect else (255,255,100) if "Multiplicador" in effect else (100,255,255)), (effects_x, effects_y + 30 + i * 25))
+                self.screen.blit(self.font_small.render(effect, True, (255,215,0) if "Dorado" in effect else (255,255,100) if "Multiplicador" in effect else (100,255,255)), (effects_x, effects_y + 30 + i * 25))
 
     def draw_particles(self):
         for p in self.particles:
@@ -533,3 +528,19 @@ class TetrisGame:
             if y + 1 >= self.board.height or self.board.grid[y + 1][x]:
                 for _ in range(10):
                     self.hard_drop_particles.append({'x': self.board_x + x * self.cell_size + self.cell_size // 2, 'y': self.board_y + (y+1) * self.cell_size - 2, 'vx': random.uniform(-2,2), 'vy': random.uniform(0,3), 'color': color, 'life': 18, 'max_life': 18, 'gravity': 0.5})
+
+    def draw_ghost_piece(self):
+        """Dibuja la pieza fantasma en el tablero"""
+        if self.board.current_piece:
+            ghost_alpha = 80
+            for x, y in self.board.current_piece.get_cells():
+                ghost_y = y + (self.board.ghost_y - self.board.current_piece.y)
+                if ghost_y >= 0 and ghost_y != y:
+                    self.draw_block(x, ghost_y, self.board.current_piece.color, ghost_alpha)
+
+    def draw_piece(self, piece):
+        """Dibuja la pieza actual en el tablero"""
+        alpha = 128 if self.ghost_mode else 255
+        for x, y in piece.get_cells():
+            if y >= 0:
+                self.draw_block(x, y, piece.color, alpha)

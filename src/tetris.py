@@ -104,10 +104,11 @@ class TetrisPiece:
         return ghost_y
 
 class TetrisBoard:
-    def __init__(self, width=10, height=20):
+    def __init__(self, width=10, height=20, extended_height=24):
         self.width = width
         self.height = height
-        self.grid = [[None for _ in range(width)] for _ in range(height)]
+        self.extended_height = extended_height  # Techo extendido
+        self.grid = [[None for _ in range(width)] for _ in range(extended_height)]
         self.current_piece = None
         self.next_piece = None
         self.ghost_y = 0
@@ -151,15 +152,14 @@ class TetrisBoard:
         if piece is None:
             piece = self.current_piece
         if piece:
-            # Check if any part of the piece is above the board (game over condition)
+            # Verificar si alguna parte de la pieza está fuera del techo extendido
             for x, y in piece.get_cells():
-                if y < 0:
-                    return False  # Piece extends above board, should trigger game over
+                if y < 0 or y >= self.extended_height:
+                    return False  # La pieza supera el techo extendido, debe terminar el juego
 
-            # Place the piece only if it's completely within bounds
+            # Colocar la pieza solo si está dentro de los límites del tablero extendido
             for x, y in piece.get_cells():
-                # SOLO COLOCAR BLOQUES DENTRO DEL TABLERO
-                if 0 <= x < self.width and 0 <= y < self.height:
+                if 0 <= x < self.width and 0 <= y < self.extended_height:
                     self.grid[y][x] = piece.color
         return True
 
@@ -243,12 +243,12 @@ class TetrisBoard:
     def check_game_over(self):
         """Verifica si el juego ha terminado"""
         if self.current_piece:
-            # Check if the current piece can be placed at its spawn position
+            # Verificar si la pieza actual puede colocarse en su posición inicial
             if not self.is_valid_position_for_piece(self.current_piece):
                 return True
-            # Also check if any part of the piece is above the board
-            for x, y in self.current_piece.get_cells():
-                if y < 0:
+            # También verificar si alguna parte de la pieza está fuera del techo extendido
+            for _, y in self.current_piece.get_cells():
+                if y < 0 or y >= self.extended_height:
                     return True
         return False
     
@@ -258,10 +258,15 @@ class TetrisBoard:
             if not self.move_piece(0, 1):
                 self.current_piece.lock_timer += 16
                 if self.current_piece.lock_timer >= 500:  # 500ms de delay
-                    self.place_piece(self.current_piece)
+                    # Intentar colocar la pieza
+                    if not self.place_piece(self.current_piece):
+                        return "game_over"  # La pieza supera el techo extendido, termina el juego
+
                     lines_cleared = self.clear_lines()
                     self.generate_new_piece()
-                    if not self.is_valid_position_for_piece(self.current_piece):
+
+                    # Verificar si la nueva pieza puede colocarse
+                    if self.check_game_over():
                         return "game_over"
                     return lines_cleared
             else:
