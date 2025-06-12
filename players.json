@@ -1,0 +1,92 @@
+{
+  "Huo": {
+    "name": "Huo (DEV)",
+    "total_score": 0,
+    "best_score": 0,
+    "games_played": 3,
+    "unlocked_cards": [
+      2,
+      1,
+      0,
+      3,
+      6,
+      4,
+      7,
+      5,
+      8,
+      9,
+      12,
+      10,
+      13,
+      11,
+      14,
+      15,
+      16,
+      17
+    ],
+    "created_date": "2025-06-12T13:59:33.570353",
+    "last_played": "2025-06-12T16:10:10.840232",
+    "achievements": [
+      "Coleccionista"
+    ],
+    "settings": {
+      "music_volume": 0.7,
+      "sfx_volume": 0.8
+    },
+    "xp": 300,
+    "coins": 100,
+    "level": 1
+  },
+  "Huo (DEV)": {
+    "name": "Huo (DEV)",
+    "total_score": 0,
+    "best_score": 0,
+    "games_played": 3,
+    "unlocked_cards": [
+      2,
+      1,
+      0,
+      3,
+      6,
+      4,
+      7,
+      5,
+      8,
+      9,
+      12,
+      10,
+      13,
+      11,
+      14,
+      15,
+      16,
+      17
+    ],
+    "created_date": "2025-06-12T13:59:33.570353",
+    "last_played": "2025-06-12T16:10:10.840232",
+    "achievements": [
+      "Coleccionista"
+    ],
+    "settings": {
+      "music_volume": 0.7,
+      "sfx_volume": 0.8
+    },
+    "xp": 300,
+    "coins": 100,
+    "level": 1
+  },
+  "hUO": {
+    "name": "hUO",
+    "total_score": 0,
+    "best_score": 0,
+    "games_played": 0,
+    "unlocked_cards": [],
+    "created_date": "2025-06-12T14:59:05.609958",
+    "last_played": "2025-06-12T16:05:29.052748",
+    "achievements": [],
+    "settings": {
+      "music_volume": 0.7,
+      "sfx_volume": 0.8
+    }
+  }
+}
